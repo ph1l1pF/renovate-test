@@ -12,6 +12,9 @@ ISSUE_BODY="# Label check action\n"
 
 REPO='ph1l1pf/renovate-test'
 
+echo "jq version"
+jq --version
+
 for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   # Extract the label type from the filter
   LABEL_TYPE=$(echo "$FILTER" | cut -d ':' -f 2 | cut -d '-' -f 1)
@@ -49,7 +52,6 @@ if [ "$HAS_ISSUES_MISSING_LABELS" ]; then
 
     # check if label "Label check action" exists
     LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO --json name,id | jq --arg label "$LABEL_CHECK_ACTION" '.[] | select(.name == "$label")') || { echo "Failed to fetch existing label check issue"; exit 1; }
-    echo "LABEL_CHECKACTION_EXISTS: $LABEL_CHECKACTION_EXISTS"
     if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
       echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
       # Create a new label "Label check action"
