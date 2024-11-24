@@ -1,8 +1,7 @@
 name: 'Check unlabeled issues'
 on:
-  schedule:
-    # Run every Sunday at midnight
-    - cron: '0 0 * * 0'
+    push:
+        branches: [main]
 
 permissions:
   issues: write
