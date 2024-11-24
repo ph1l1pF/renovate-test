@@ -12,6 +12,8 @@ ISSUE_BODY="# Label check action\n"
 
 REPO='ph1l1pf/renovate-test'
 
+ISSUE_TITLE="Found other non-labled issues"
+
 for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   # Extract the label type from the filter
   LABEL_TYPE=$(echo "$FILTER" | cut -d ':' -f 2 | cut -d '-' -f 1)
@@ -20,7 +22,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   ISSUES_MISSING_LABEL=$(gh issue list --repo $REPO --limit 100000 -s open -S "$FILTER" --json "number,title") || { echo "Failed to fetch issues without $LABEL_TYPE labels"; exit 1; }
 
   # filter out issue with title the label action issue itself
-  ISSUES_MISSING_LABEL=$(echo "$ISSUES_MISSING_LABEL" | jq 'map(select(.title != "Label check action"))')
+  ISSUES_MISSING_LABEL=$(echo "$ISSUES_MISSING_LABEL" | jq 'map(select(.title != "$ISSUE_TITLE"))')
 
   if [ "$ISSUES_MISSING_LABEL" != "[]" ]; then
     HAS_ISSUES_MISSING_LABELS=true
@@ -41,8 +43,6 @@ if [ "$HAS_ISSUES_MISSING_LABELS" ]; then
   LABEL_CHECK_ACTION="Label check action"
   LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --label "$LABEL_CHECK_ACTION" --repo $REPO --json number) || { echo "Failed to fetch existing label check issue"; exit 1; }
   ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
-
-  ISSUE_TITLE="Found other non-labled issues"
 
   if [ -z "$ISSUE_NUMBER" ]; then
 
