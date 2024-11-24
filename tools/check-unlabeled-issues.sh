@@ -39,7 +39,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
 done
 echo "HAS_ISSUES_MISSING_LABELS: $HAS_ISSUES_MISSING_LABELS"
 
-if [ "$HAS_ISSUES_MISSING_LABELS = true" ]; then
+if [ "$HAS_ISSUES_MISSING_LABELS" = true ]; then
   LABEL_CHECK_ACTION="Label check action"
   LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --label "$LABEL_CHECK_ACTION" --repo $REPO --json number) || { echo "Failed to fetch existing label check issue"; exit 1; }
   ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
