@@ -37,38 +37,41 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
     ISSUE_BODY="$ISSUE_BODY## Found $ISSUE_COUNT $ISSUE_SINGULAR_PLURAL missing \`$LABEL_TYPE:\` labels:\n$FORMATTED_OUTPUT\n"
   fi
 done
-echo "HAS_ISSUES_MISSING_LABELS: $HAS_ISSUES_MISSING_LABELS"
 
-if [ "$HAS_ISSUES_MISSING_LABELS" = true ]; then
-  LABEL_CHECK_ACTION="Label check action"
-  LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --label "$LABEL_CHECK_ACTION" --repo $REPO --json number) || { echo "Failed to fetch existing label check issue"; exit 1; }
-  ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
+if [ "$HAS_ISSUES_MISSING_LABELS" = false ]; then
+  echo "Found no issues with missing labels. Exixting the action."
+  exit 0
+fi
 
-  if [ -z "$ISSUE_NUMBER" ]; then
+LABEL_CHECK_ACTION="Label check action"
+LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --label "$LABEL_CHECK_ACTION" --repo $REPO --json number) || { echo "Failed to fetch existing label check issue"; exit 1; }
+ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
 
-    # check if label "Label check action" exists
-    LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO | grep "$LABEL_CHECK_ACTION") || { echo "Failed to fetch existing label check issue"; exit 1; }
-    if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
-      echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
-      # Create a new label "Label check action"
-      gh label create "$LABEL_CHECK_ACTION" --description "This label is used for the issue that lists invalid issues." --repo $REPO || { echo "Failed to create label"; exit 1; }
-    fi
+if [ -z "$ISSUE_NUMBER" ]; then
 
-    # Create a new issue with the list of issues
-    gh issue create --repo $REPO --label "$LABEL_CHECK_ACTION" --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to create issue"; exit 1; }
-  else
-    # Update the existing issue with the list of issues
-    gh issue edit "$ISSUE_NUMBER" --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue"; exit 1; }
-
-    # Reopen the issue
-    gh issue reopen "$ISSUE_NUMBER" --repo $REPO || { echo "Failed to reopen issue"; exit 1; }
+  # check if label "Label check action" exists
+  LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO | grep "$LABEL_CHECK_ACTION") || { echo "Failed to fetch existing label check issue"; exit 1; }
+  if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
+    echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
+    # Create a new label "Label check action"
+    gh label create "$LABEL_CHECK_ACTION" --description "This label is used for the issue that lists invalid issues." --repo $REPO || { echo "Failed to create label"; exit 1; }
   fi
 
-  # Provide an output in the action itself
-  echo -e "$ISSUE_BODY"
+  # Create a new issue with the list of issues
+  gh issue create --repo $REPO --label "$LABEL_CHECK_ACTION" --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to create issue"; exit 1; }
+else
+  # Update the existing issue with the list of issues
+  gh issue edit "$ISSUE_NUMBER" --repo $REPO --title "$ISSUE_TITLE" --body "$(echo -e "$ISSUE_BODY")" || { echo "Failed to update issue"; exit 1; }
 
-  # Fail the action if there are issues missing the correct labels
-  echo "Found issues missing labels. Please check the issue(s) above."
-
-  exit 1
+  # Reopen the issue
+  gh issue reopen "$ISSUE_NUMBER" --repo $REPO || { echo "Failed to reopen issue"; exit 1; }
 fi
+
+# Provide an output in the action itself
+echo -e "$ISSUE_BODY"
+
+# Fail the action if there are issues missing the correct labels
+echo "Found issues missing labels. Please check the issue(s) above."
+
+exit 1
+
