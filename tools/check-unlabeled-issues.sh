@@ -22,7 +22,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   ISSUES_MISSING_LABEL=$(gh issue list --repo $REPO --limit 100000 -s open -S "$FILTER" --json "number,title") || { echo "Failed to fetch issues without $LABEL_TYPE labels"; exit 1; }
 
   # filter out issue with title the label action issue itself
-  ISSUES_MISSING_LABEL=$(echo "$ISSUES_MISSING_LABEL" | jq 'map(select(.title != "$ISSUE_TITLE"))')
+  ISSUES_MISSING_LABEL=$(echo "$ISSUES_MISSING_LABEL" | jq --arg title "$ISSUE_TITLE" 'map(select(.title != $title))')
 
   if [ "$ISSUES_MISSING_LABEL" != "[]" ]; then
     HAS_ISSUES_MISSING_LABELS=true
