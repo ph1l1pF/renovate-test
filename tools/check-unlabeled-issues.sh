@@ -48,7 +48,7 @@ if [ "$HAS_ISSUES_MISSING_LABELS" ]; then
   if [ -z "$ISSUE_NUMBER" ]; then
 
     # check if label "Label check action" exists
-    LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO --json name,id | jq --arg label "$LABEL_CHECK_ACTION" '.[] | select(.name == $label)') || { echo "Failed to fetch existing label check issue"; exit 1; }
+    LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO --json name,id | jq --arg label "$LABEL_CHECK_ACTION" '.[] | select(.name == "$label")') || { echo "Failed to fetch existing label check issue"; exit 1; }
     echo "LABEL_CHECKACTION_EXISTS: $LABEL_CHECKACTION_EXISTS"
     if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
       echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
