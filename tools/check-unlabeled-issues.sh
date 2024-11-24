@@ -23,9 +23,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   # filter out issue with title the label action issue itself
   ISSUES_MISSING_LABEL=$(echo "$ISSUES_MISSING_LABEL" | jq --arg title "$ISSUE_TITLE" 'map(select(.title != $title))')
   
-  echo "ISSUES_MISSING_LABEL: $ISSUES_MISSING_LABEL"
   if [ "$ISSUES_MISSING_LABEL" != "[]" ]; then
-    echo nooooooooo
     HAS_ISSUES_MISSING_LABELS=true
 
     # Format the output to be a list of issue numbers
@@ -40,7 +38,7 @@ for FILTER in "$TYPE_LABELS_FILTER" "$PRIORITY_LABELS_FILTER"; do
   fi
 done
 
-if [ "$HAS_ISSUES_MISSING_LABELS" ]; then
+if [ "$HAS_ISSUES_MISSING_LABELS == true" ]; then
   LABEL_CHECK_ACTION="Label check action"
   LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --label "$LABEL_CHECK_ACTION" --repo $REPO --json number) || { echo "Failed to fetch existing label check issue"; exit 1; }
   ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
