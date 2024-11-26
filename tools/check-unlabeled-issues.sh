@@ -50,7 +50,7 @@ ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
 if [ -z "$ISSUE_NUMBER" ]; then
 
   # check if label "Label check action" exists
-  LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO | grep "$LABEL_CHECK_ACTION") || { echo "Failed to fetch existing label check issue"; exit 1; }
+  LABEL_CHECKACTION_EXISTS=$(gh label list --repo $REPO | grep "$LABEL_CHECK_ACTION") || { echo "Failed to fetch existing label"; exit 1; }
   if [ -z "$LABEL_CHECKACTION_EXISTS" ]; then
     echo "Label '$LABEL_CHECK_ACTION' does not exist. Will create it."
     # Create a new label "Label check action"
