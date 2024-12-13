@@ -43,7 +43,7 @@ if [ "$HAS_ISSUES_MISSING_LABELS" = false ]; then
   exit 0
 fi
 
-LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --author "bot" --repo $REPO --json "number,title" | jq --arg title "$ISSUE_TITLE" 'map(select(.title == $title))') || { echo "Failed to fetch existing label check issue"; exit 1; }
+LABEL_CHECK_ISSUE_EXISTS=$(gh search issues --repo $REPO --json "number,title" | jq --arg title "$ISSUE_TITLE" 'map(select(.title == $title and .author.is_bot == "true"))') || { echo "Failed to fetch existing label check issue"; exit 1; }
 ISSUE_NUMBER=$(echo "$LABEL_CHECK_ISSUE_EXISTS" | jq -r '.[].number')
 
 if [ -z "$ISSUE_NUMBER" ]; then
