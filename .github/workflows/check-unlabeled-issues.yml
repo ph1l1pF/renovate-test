@@ -3,12 +3,12 @@ on:
     push:
         branches: [main]
 
-permissions:
-  issues: write
-
 jobs:
   check-unlabeled-issues:
     runs-on: ubuntu-latest
+
+    permissions:
+      issues: write  # Moved here to limit the scope to this job only
 
     env:
       GH_TOKEN: ${{ github.token }}
